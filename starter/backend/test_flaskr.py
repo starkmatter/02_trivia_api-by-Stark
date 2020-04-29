@@ -18,10 +18,10 @@ class TriviaTestCase(unittest.TestCase):
         self.database_path = "postgres://{}:{}@{}/{}".format('postgres', '', 'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
         self.new_question = {
-            'question': 'How are you?',
+            'question': 'How are yooou?',
             'answer': 'Great',
-            'difficulty': 3,
-            'category': 'Science'
+            'difficulty': '4',
+            'category': '1'
         }
 
         # binds the app to the current context
@@ -39,7 +39,7 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
-
+    # GET '/questions' unit tests
     def test_paginated_questions(self):
         res = self.client().get('/questions')
         data = json.loads(res.data)
@@ -47,22 +47,48 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
     
-    def test_404_paginated_questions(self):
-        res = self.client().get('/questions?page=10000', json = {'difficulty':1})
+    def test_422_paginated_questions(self):
+        res = self.client().get('/questions?page=1000', json={'difficulty':8})
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data["success"], False)
-        self.assertEqual(data["message"], "resource not found")
+        self.assertEqual(data['error'], 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'unprocessable entity')
+    
+    # POST '/questions' unit tests
+    def test_create_question(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
 
-    def test_search_for_question(self):        
-        search_json_dump = json.dumps({'searchTerm': 'what'})
-        search_json = {'searchTerm':'what'}
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+    
+    def test_405_create_question_not_allowed(self):
+        res = self.client().post('/questions/45', json=self.new_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(data['error'], 405)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'method not allowed')
+
+    # GET '/categories' unit tests
+    def test_fetch_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+    
+    # DELETE '/questions/<int:question_id>' unit tests
+    def test_delete_question(self):
+        res = self.client().delete('/questions/4')
+        data = json.loads(res.data)
+
+        question = Question.query.filter(Question.id ==4).one_or_none()
         
-        print(type(search_json))
-        print(type(search_json_dump))
-        print(type(json.dumps({"c":0, "b":0,"a":0})))
-                
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(question, None)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

@@ -45,15 +45,21 @@ def create_app(test_config=None):
   '''
   @app.route('/categories')
   def retrieve_cats():
-    list_categories = Category.query.order_by(Category.id).all()
 
-    categories = {} 
-    for category in list_categories:
-      categories[category.id] = category.type
+    try:
+      list_categories = Category.query.order_by(Category.id).all()
 
-    return jsonify({
-      "categories": categories
-    })
+      categories = {} 
+      for category in list_categories:
+        categories[category.id] = category.type
+
+      return jsonify({
+        "success": True,
+        "categories": categories
+      })
+
+    except:
+      abort(422)
 
   '''
   @TODO: 
@@ -69,25 +75,31 @@ def create_app(test_config=None):
   '''
   @app.route('/questions', methods=['GET'])
   def get_questions():
-    list_questions = Question.query.order_by(Question.id).all()
-    current_questions = pagination_questions(request, list_questions)
 
-    list_categories = Category.query.order_by(Category.id).all()
+    try:
+      list_questions = Question.query.order_by(Question.id).all()
+      current_questions = pagination_questions(request, list_questions)
 
-    categories = {} 
-    for category in list_categories:
-      categories[category.id] = category.type
-      
-    if len(current_questions) == 0:
-      abort(404)
+      list_categories = Category.query.order_by(Category.id).all()
 
-    return jsonify({
-      "success": True,
-      "questions": current_questions,
-      "total_questions": len(Question.query.all()),
-      "categories": categories,
-      "current_category": None
-    })
+      if len(current_questions) == 0:
+        abort(404)
+
+      categories = {} 
+      for category in list_categories:
+        categories[category.id] = category.type
+        
+      return jsonify({
+        "success": True,
+        "questions": current_questions,
+        "total_questions": len(Question.query.all()),
+        "categories": categories,
+        "current_category": None
+      })
+    
+    except:
+      abort(422)
+
 
   '''
   @TODO: 
@@ -141,12 +153,11 @@ def create_app(test_config=None):
       question.insert()
 
       return jsonify({
-        "success": True,
-        "created": question.id
+        "success": True
       })
 
     except:
-      abort(422)
+      abort(405)
 
   '''
   @TODO: 
@@ -267,6 +278,14 @@ def create_app(test_config=None):
         "success": False,
         "error": 404,
         "message": "resource not found"
+      })
+
+  @app.errorhandler(405)
+  def unprocessable(error):
+      return jsonify({
+        "success": False,
+        "error": 405,
+        "message": "method not allowed"
       })
 
   @app.errorhandler(422)
