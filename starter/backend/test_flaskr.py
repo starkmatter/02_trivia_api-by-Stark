@@ -81,14 +81,23 @@ class TriviaTestCase(unittest.TestCase):
     
     # DELETE '/questions/<int:question_id>' unit tests
     def test_delete_question(self):
-        res = self.client().delete('/questions/4')
+        res = self.client().delete('/questions/5')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id ==4).one_or_none()
+        question = Question.query.filter(Question.id ==5).one_or_none()
         
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(question, None)
+
+    # POST '/searchQuestions' unit tests
+    def test_searchQuestions(self):
+        res = self.client().post('/searchQuestions?searchTerm="what"')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

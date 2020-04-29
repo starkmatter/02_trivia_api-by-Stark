@@ -173,19 +173,22 @@ def create_app(test_config=None):
   def search_question():
     search_term = request.form.get('searchTerm', '')
   
-    list_questions = Question.query.filter(Question.question.ilike('%{}%'.format(search_term)))
-    current_questions = pagination_questions(request, list_questions)
-      
-    if len(current_questions) == 0:
+    try:
+      list_questions = Question.query.filter(Question.question.ilike('%{}%'.format(search_term)))
+      current_questions = pagination_questions(request, list_questions)
+        
+      if len(current_questions) == 0:
+        abort(404)
+
+      return jsonify({
+        "success": True,
+        "questions": current_questions,
+        "total_questions": len(Question.query.all()),
+        "current_category": None
+      })
+
+    except:
       abort(404)
-
-    return jsonify({
-      "success": True,
-      "questions": current_questions,
-      "total_questions": len(Question.query.all()),
-      "current_category": None
-    })
-
     
   '''
   @TODO: 
