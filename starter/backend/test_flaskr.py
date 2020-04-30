@@ -98,6 +98,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
 
+    # POST '/quizzes' unit tests
+    def test_quiz_random_question(self):
+    
+        self.quiz_category = {
+            'previous_questions': [5, 9],
+            'quiz_category': {
+                'type': 'History',
+                'id': 4
+            }}
+    
+        res = self.client().post('/quizzes', data=json.dumps(self.quiz_category) , headers={'Content-Type': 'application/json'})
+        data = json.loads(res.data.decode('utf-8'))
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

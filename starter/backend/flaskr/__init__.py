@@ -238,6 +238,8 @@ def create_app(test_config=None):
     previous_questions = body.get('previous_questions', None)
     quiz_category = body.get('quiz_category', None)
     
+    print(quiz_category)
+
     try:
       #collect questions in selected category that aren't in previous questions list
       questions = Question.query.filter_by(category=quiz_category['id']).filter(Question.id.notin_(previous_questions)).all()
@@ -303,7 +305,7 @@ def create_app(test_config=None):
   def internal_server_error(error):
       return jsonify({
         "success": False,
-        "error": 422,
+        "error": 500,
         "message": "internal server error"
       })
 
